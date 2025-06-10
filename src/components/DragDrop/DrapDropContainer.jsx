@@ -20,7 +20,7 @@ import { useTaskStore } from "../../store/taskStore.js";
 import TaskCard from "../Task/TaskCard.jsx";
 
 // Thành phần cho từng task có thể kéo thả
-const SortableTask = ({ task, onTaskClick, onEditTask }) => {
+const SortableTask = ({ task, onTaskClick, onEditTask, onDeleteTask }) => {
   const {
     attributes,
     listeners,
@@ -45,7 +45,11 @@ const SortableTask = ({ task, onTaskClick, onEditTask }) => {
       onClick={() => onTaskClick(task)}
       className="cursor-move mb-2 rounded-lg bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
     >
-      <TaskCard task={task} onEditTask={onEditTask} />
+      <TaskCard
+        task={task}
+        onEditTask={onEditTask}
+        onDeleteTask={onDeleteTask}
+      />
     </div>
   );
 };
@@ -57,6 +61,7 @@ const SortableColumn = ({
   onTaskClick,
   onCreateTask,
   onEditTask,
+  onDeleteTask,
   isOver,
 }) => {
   const {
@@ -82,9 +87,22 @@ const SortableColumn = ({
       {...listeners}
       className="flex-1 bg-gray-200 dark:bg-gray-800 rounded-lg p-2 sm:p-3 min-h-[150px] sm:min-h-[200px] flex flex-col"
     >
-      <h2 className="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 cursor-grab">
-        {column.title} ({tasks.length})
-      </h2>
+      <div className="flex items-center mb-2">
+        <span
+          className={`w-3 h-3 rounded-full mr-2 ${
+            column.status === "toDo"
+              ? "bg-purple-500" // To Do - Purple
+              : column.status === "progress"
+              ? "bg-blue-500" // Progress - Blue
+              : column.status === "done"
+              ? "bg-green-500" // Done - Green
+              : "bg-gray-500"
+          }`}
+        ></span>
+        <h2 className="text-md font-semibold text-gray-800 dark:text-gray-200 cursor-grab">
+          {column.title} ({tasks.length})
+        </h2>
+      </div>
       <div className="flex-1 space-y-2">
         <SortableContext
           items={tasks.map((task) => task.id)}
@@ -96,6 +114,7 @@ const SortableColumn = ({
               task={task}
               onTaskClick={onTaskClick}
               onEditTask={onEditTask}
+              onDeleteTask={onDeleteTask}
             />
           ))}
         </SortableContext>
@@ -126,9 +145,10 @@ const DragDropContainer = ({
   currentBoardId,
   onTaskClick,
   onCreateTask,
-  onEditTask = () => {}, // Default empty function to avoid errors
+  onEditTask = () => {},
+  onDeleteTask = () => {}, // Thêm onDeleteTask với default empty function
 }) => {
-  const { updateTaskStatus } = useTaskStore();
+  const { updateTaskStatus, updateTaskOrder } = useTaskStore();
   const [activeId, setActiveId] = useState(null);
   const [isOver, setIsOver] = useState(false);
 
@@ -212,8 +232,18 @@ const DragDropContainer = ({
         );
         if (activeIndex !== overIndex) {
           const updatedTasks = arrayMove(activeTasks, activeIndex, overIndex);
-          console.log("New task order:", updatedTasks);
-          // Cần truyền updatedTasks lên KanbanBoard hoặc useTaskStore
+          console.log(
+            "New task order before update:",
+            updatedTasks.map((t) => t.title)
+          );
+          updateTaskOrder(
+            updatedTasks.map((task) => task.id),
+            activeColumn.status
+          );
+          console.log(
+            "New task order after update:",
+            updatedTasks.map((t) => t.title)
+          );
         }
       }
     }
@@ -243,6 +273,7 @@ const DragDropContainer = ({
               onTaskClick={onTaskClick}
               onCreateTask={onCreateTask}
               onEditTask={onEditTask}
+              onDeleteTask={onDeleteTask}
               isOver={isOver}
             />
           ))}
@@ -251,7 +282,11 @@ const DragDropContainer = ({
       <DragOverlay>
         {activeTask ? (
           <div className="rounded-lg bg-white dark:bg-gray-800 shadow-md opacity-80">
-            <TaskCard task={activeTask} onEditTask={onEditTask} />
+            <TaskCard
+              task={activeTask}
+              onEditTask={onEditTask}
+              onDeleteTask={onDeleteTask}
+            />
           </div>
         ) : activeColumn ? (
           <div className="flex-1 bg-gray-500 dark:bg-gray-800 rounded-lg p-3 min-h-[200px] flex flex-col opacity-80">
@@ -270,3 +305,4 @@ const sortableKeyboardCoordinates = (event) => {
 };
 
 export default DragDropContainer;
+//

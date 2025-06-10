@@ -35,7 +35,23 @@ export const useBoardStore = create(
               : state.currentBoard,
         })),
       setCurrentBoard: (board) => set({ currentBoard: board }),
+
+      updateColumnOrder: (newColumnOrder) =>
+        set((state) => {
+          if (state.currentBoard) {
+            console.log("Updating column order to:", newColumnOrder);
+            return {
+              currentBoard: {
+                ...state.currentBoard,
+                columns: newColumnOrder,
+              },
+            };
+          }
+          console.warn("No currentBoard to update column order");
+          return state;
+        }),
     }),
+
     { name: "board-storage" }
   )
 );

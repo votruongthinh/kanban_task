@@ -37,6 +37,50 @@ export const useTaskStore = create(
         set((state) => ({
           tasks: state.tasks.filter((task) => task.id !== taskId),
         })),
+      updateTaskOrder: (taskIds, status) =>
+        set((state) => {
+          const allTasks = [...state.tasks]; // Tạo bản sao để tránh mutating state trực tiếp
+          const tasksToReorder = allTasks.filter(
+            (task) => task.status === status
+          );
+          console.log(
+            "Tasks to reorder:",
+            tasksToReorder.map((t) => t.title)
+          );
+          console.log("Task IDs received:", taskIds);
+          const validTaskIds = taskIds.filter((id) =>
+            tasksToReorder.some((task) => task.id === id)
+          );
+          if (validTaskIds.length === 0) {
+            console.warn("No valid task IDs to reorder:", { taskIds, status });
+            return { tasks: allTasks };
+          }
+          const reorderedTasks = validTaskIds.map((id) =>
+            tasksToReorder.find((task) => task.id === id)
+          );
+          const remainingTasks = tasksToReorder.filter(
+            (task) => !validTaskIds.includes(task.id)
+          );
+          const unchangedTasks = allTasks.filter(
+            (task) => task.status !== status
+          );
+          const newTasks = [
+            ...reorderedTasks,
+            ...remainingTasks,
+            ...unchangedTasks,
+          ];
+          console.log(
+            "Reordered tasks for status",
+            status,
+            ":",
+            reorderedTasks.map((t) => t.title)
+          );
+          console.log(
+            "All tasks after reorder:",
+            newTasks.map((t) => t.title)
+          );
+          return { tasks: newTasks };
+        }),
     }),
     { name: "task-storage" }
   )
