@@ -4,6 +4,8 @@ import { useTaskStore } from "../store/taskStore.js";
 import { useUiStore } from "../store/uiStore.js";
 import DragDropContainer from "../components/DragDrop/DrapDropContainer";
 import AddTaskModal from "../components/Task/AddTaskModal.jsx";
+import EditTaskModal from "../components/Task/EditTaskModal";
+import { Edit } from "lucide-react";
 
 const columns = [
   { id: "1", title: "To Do", status: "toDo" },
@@ -15,7 +17,7 @@ const KanbanBoard = () => {
   const { currentBoard } = useBoardStore();
   const { tasks } = useTaskStore();
   const { toggleSidebar, isSidebarVisible } = useUiStore();
-
+  const [isEditTaskModalOpen, setIsEditTaskModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [defaultStatus, setDefaultStatus] = useState("toDo");
@@ -23,6 +25,11 @@ const KanbanBoard = () => {
   const handleTaskClick = (task) => {
     setSelectedTask(task);
     setIsTaskModalOpen(true);
+  };
+
+  const onEditTask = (task) => {
+    setSelectedTask(task);
+    setIsEditTaskModalOpen(true);
   };
 
   const handleCreateTask = (status) => {
@@ -61,6 +68,7 @@ const KanbanBoard = () => {
         currentBoardId={currentBoard.id}
         onTaskClick={handleTaskClick}
         onCreateTask={handleCreateTask}
+        onEditTask={onEditTask}
       />
 
       {isTaskModalOpen && (
@@ -69,6 +77,12 @@ const KanbanBoard = () => {
           onClose={() => setIsTaskModalOpen(false)}
           defaultStatus={defaultStatus}
           isViewMode={!!selectedTask}
+        />
+      )}
+      {isEditTaskModalOpen && (
+        <EditTaskModal
+          task={selectedTask}
+          onClose={() => setIsEditTaskModalOpen(false)}
         />
       )}
     </div>

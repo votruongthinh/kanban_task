@@ -20,7 +20,7 @@ import { useTaskStore } from "../../store/taskStore.js";
 import TaskCard from "../Task/TaskCard.jsx";
 
 // Thành phần cho từng task có thể kéo thả
-const SortableTask = ({ task, onTaskClick }) => {
+const SortableTask = ({ task, onTaskClick, onEditTask }) => {
   const {
     attributes,
     listeners,
@@ -45,7 +45,7 @@ const SortableTask = ({ task, onTaskClick }) => {
       onClick={() => onTaskClick(task)}
       className="cursor-move mb-2 rounded-lg bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
     >
-      <TaskCard task={task} />
+      <TaskCard task={task} onEditTask={onEditTask} />
     </div>
   );
 };
@@ -56,6 +56,7 @@ const SortableColumn = ({
   tasks,
   onTaskClick,
   onCreateTask,
+  onEditTask,
   isOver,
 }) => {
   const {
@@ -79,9 +80,9 @@ const SortableColumn = ({
       style={style}
       {...attributes}
       {...listeners}
-      className="flex-1 bg-gray-200 dark:bg-gray-800 rounded-lg p-3 min-h-[200px] flex flex-col"
+      className="flex-1 bg-gray-200 dark:bg-gray-800 rounded-lg p-2 sm:p-3 min-h-[150px] sm:min-h-[200px] flex flex-col"
     >
-      <h2 className="text-md font-semibold text-gray-800 dark:text-gray-200 mb-3 cursor-grab">
+      <h2 className="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2 cursor-grab">
         {column.title} ({tasks.length})
       </h2>
       <div className="flex-1 space-y-2">
@@ -90,19 +91,24 @@ const SortableColumn = ({
           strategy={verticalListSortingStrategy}
         >
           {tasks.map((task) => (
-            <SortableTask key={task.id} task={task} onTaskClick={onTaskClick} />
+            <SortableTask
+              key={task.id}
+              task={task}
+              onTaskClick={onTaskClick}
+              onEditTask={onEditTask}
+            />
           ))}
         </SortableContext>
         {/* Drop zone với đường ngắt khúc */}
         <div
-          className={`h-10 border-2 border-dotted border-gray-400 dark:border-gray-600 rounded text-center text-gray-600 dark:text-gray-300 text-sm transition-opacity ${
+          className={`h-8 sm:h-10 border-2 border-dotted border-gray-400 dark:border-gray-600 rounded text-center text-gray-600 dark:text-gray-300 text-xs sm:text-sm transition-opacity ${
             isOver ? "opacity-100" : "opacity-0"
           }`}
         >
           Hãy thả vào đây
         </div>
       </div>
-      <div className="mt-3">
+      <div className="mt-2">
         <button
           onClick={() => onCreateTask(column.status)}
           className="w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 py-1.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm"
@@ -120,6 +126,7 @@ const DragDropContainer = ({
   currentBoardId,
   onTaskClick,
   onCreateTask,
+  onEditTask = () => {}, // Default empty function to avoid errors
 }) => {
   const { updateTaskStatus } = useTaskStore();
   const [activeId, setActiveId] = useState(null);
@@ -146,13 +153,13 @@ const DragDropContainer = ({
 
   const handleDragStart = (event) => {
     setActiveId(event.active.id);
-    setIsOver(true); // Hiển thị drop zone khi bắt đầu kéo
+    setIsOver(true);
   };
 
   const handleDragOver = (event) => {
     const { over } = event;
     if (over) {
-      setIsOver(true); // Giữ drop zone hiển thị khi kéo qua bất kỳ cột nào
+      setIsOver(true);
     }
   };
 
@@ -160,7 +167,7 @@ const DragDropContainer = ({
     const { active, over } = event;
 
     setActiveId(null);
-    setIsOver(false); // Ẩn drop zone khi kết thúc kéo
+    setIsOver(false);
     if (!over) return;
 
     const activeId = active.id;
@@ -173,8 +180,11 @@ const DragDropContainer = ({
       const oldIndex = columns.findIndex((col) => col.id === activeId);
       const newIndex = columns.findIndex((col) => col.id === overId);
       if (oldIndex !== newIndex) {
-        const newColumns = arrayMove(columns, oldIndex, newIndex);
-        console.log("New column order:", newColumns);
+        console.log(
+          "New column order:",
+          arrayMove(columns, oldIndex, newIndex)
+        );
+        // Cần truyền lên KanbanBoard để áp dụng
       }
     } else {
       const activeTaskId = active.id;
@@ -194,14 +204,16 @@ const DragDropContainer = ({
         updateTaskStatus(activeTaskId, overColumn.status);
       } else {
         const activeTasks = getTasksByStatus(activeColumn.status);
-        const overTasks = getTasksByStatus(overColumn.status);
+        const overIndex = activeTasks.findIndex(
+          (task) => task.id === overTaskId
+        );
         const activeIndex = activeTasks.findIndex(
           (task) => task.id === activeTaskId
         );
-        const overIndex = overTasks.findIndex((task) => task.id === overTaskId);
-
         if (activeIndex !== overIndex) {
           const updatedTasks = arrayMove(activeTasks, activeIndex, overIndex);
+          console.log("New task order:", updatedTasks);
+          // Cần truyền updatedTasks lên KanbanBoard hoặc useTaskStore
         }
       }
     }
@@ -230,7 +242,8 @@ const DragDropContainer = ({
               tasks={getTasksByStatus(column.status)}
               onTaskClick={onTaskClick}
               onCreateTask={onCreateTask}
-              isOver={isOver} // Truyền trạng thái isOver xuống component
+              onEditTask={onEditTask}
+              isOver={isOver}
             />
           ))}
         </SortableContext>
@@ -238,7 +251,7 @@ const DragDropContainer = ({
       <DragOverlay>
         {activeTask ? (
           <div className="rounded-lg bg-white dark:bg-gray-800 shadow-md opacity-80">
-            <TaskCard task={activeTask} />
+            <TaskCard task={activeTask} onEditTask={onEditTask} />
           </div>
         ) : activeColumn ? (
           <div className="flex-1 bg-gray-500 dark:bg-gray-800 rounded-lg p-3 min-h-[200px] flex flex-col opacity-80">
@@ -257,4 +270,3 @@ const sortableKeyboardCoordinates = (event) => {
 };
 
 export default DragDropContainer;
-// Added responsive styles for mobile view
