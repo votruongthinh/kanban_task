@@ -6,6 +6,9 @@ import BoardModal from "./components/Board/BoardModal";
 
 function App() {
   const isDarkMode = useUiStore((state) => state.isDarkMode);
+  const toggleSidebar = useUiStore((state) => state.toggleSidebar);
+  const isSidebarVisible = useUiStore((state) => state.isSidebarVisible);
+
   const [isBoardModalOpen, setIsBoardModalOpen] = useState(false);
 
   const handleOpenBoardModal = () => {
@@ -16,14 +19,39 @@ function App() {
     <div
       className={`min-h-screen ${isDarkMode ? "dark bg-darkBg" : "bg-lightBg"}`}
     >
-      <div className="flex h-screen">
+      <div className="flex h-screen relative overflow-hidden">
+        {/* Sidebar */}
         <Sidebar onOpenBoardModal={handleOpenBoardModal} />
-        <div className="flex flex-col flex-1 overflow-hidden">
+
+        {/* Overlay khi mở sidebar trên mobile */}
+        {isSidebarVisible && (
+          <div
+            onClick={toggleSidebar}
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 sm:hidden"
+          ></div>
+        )}
+
+        {/* Content chính */}
+        <div className="flex flex-col flex-1 overflow-hidden z-10">
+          {/* Nút mở Sidebar trên mobile */}
+          {!isSidebarVisible && (
+            <div className="absolute top-4 left-4 z-50">
+              <button
+                onClick={toggleSidebar}
+                className="text-gray-700 dark:text-gray-200 text-2xl bg-white dark:bg-darkCard p-2 rounded shadow hover:shadow-md"
+              >
+                ☰
+              </button>
+            </div>
+          )}
+
           <main className="flex-1 overflow-auto">
             <KanbanBoard />
           </main>
         </div>
       </div>
+
+      {/* Modal tạo/sửa board */}
       <BoardModal
         isOpen={isBoardModalOpen}
         onClose={() => setIsBoardModalOpen(false)}

@@ -3,14 +3,15 @@ import BoardList from "../Sidebar/BoardList";
 import ThemeToggle from "../Task/ThemeToggle";
 
 const Sidebar = ({ onOpenBoardModal }) => {
-  const { toggleSidebar, isSidebarVisible, isDarkMode } = useUiStore();
-  const sidebarClasses = `w-64 bg-white dark:bg-darkCard border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-300 transform ${
-    isSidebarVisible ? "translate-x-0" : "-translate-x-full"
-  }`;
+  const { toggleSidebar, isSidebarVisible } = useUiStore();
 
-  if (!onOpenBoardModal) {
-    console.warn("onOpenBoardModal prop is missing in Sidebar component");
-  }
+  const sidebarClasses = `
+    fixed inset-y-0 left-0 z-50 w-64 h-screen
+    bg-white dark:bg-darkCard 
+    border-r border-gray-200 dark:border-gray-700 
+    flex flex-col transform transition-transform duration-300
+    ${isSidebarVisible ? "translate-x-0" : "-translate-x-full"}
+  `;
 
   return (
     <div className={sidebarClasses} aria-label="Sidebar">
@@ -22,15 +23,16 @@ const Sidebar = ({ onOpenBoardModal }) => {
           </span>
         </div>
       </div>
+
       <BoardList onOpenBoardModal={onOpenBoardModal} />
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700 mt-auto">
         <ThemeToggle />
         <button
           onClick={toggleSidebar}
-          className="mt-2 w-full text-center text-gray-600 dark:text-gray-300 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center space-x-2"
-          aria-label="Hide Sidebar"
+          className="mt-2 w-full text-center text-gray-600 dark:text-gray-300 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
         >
-          <span>Hide Sidebar</span>
+          Đóng Sidebar
         </button>
       </div>
     </div>

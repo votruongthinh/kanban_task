@@ -3,7 +3,7 @@ import { useBoardStore } from "../store/boardStore.js";
 import { useTaskStore } from "../store/taskStore.js";
 import { useUiStore } from "../store/uiStore.js";
 import DragDropContainer from "../components/DragDrop/DrapDropContainer";
-import TaskModal from "../components/Task/TaskModel";
+import AddTaskModal from "../components/Task/AddTaskModal.jsx";
 
 const columns = [
   { id: "1", title: "To Do", status: "toDo" },
@@ -15,6 +15,7 @@ const KanbanBoard = () => {
   const { currentBoard } = useBoardStore();
   const { tasks } = useTaskStore();
   const { toggleSidebar, isSidebarVisible } = useUiStore();
+
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [defaultStatus, setDefaultStatus] = useState("toDo");
@@ -46,22 +47,14 @@ const KanbanBoard = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
+    <div className="p-4 sm:p-6">
+      {/* tên của board khi chuyển */}
+      <div className="flex justify-center items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 text-center">
           {currentBoard.name}
         </h1>
-        <div className="flex items-center space-x-4">
-          {!isSidebarVisible && (
-            <button
-              onClick={toggleSidebar}
-              className="p-2 bg-primary text-white rounded hover:bg-secondary transition"
-            >
-              Show Sidebar
-            </button>
-          )}
-        </div>
       </div>
+
       <DragDropContainer
         columns={columns}
         tasks={tasks}
@@ -69,11 +62,13 @@ const KanbanBoard = () => {
         onTaskClick={handleTaskClick}
         onCreateTask={handleCreateTask}
       />
+
       {isTaskModalOpen && (
-        <TaskModal
+        <AddTaskModal
           task={selectedTask}
           onClose={() => setIsTaskModalOpen(false)}
           defaultStatus={defaultStatus}
+          isViewMode={!!selectedTask}
         />
       )}
     </div>

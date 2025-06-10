@@ -6,8 +6,9 @@ import { useBoardStore } from "../../store/boardStore.js";
 import Modal from "../UI/Modal";
 import Input from "../UI/Input";
 import { useState } from "react";
+import TaskDetail from "./TaskDetail";
 
-// Định nghĩa schema xác thực với Zod
+// Định nghĩa schema xác thực
 const taskSchema = z.object({
   title: z.string().min(1, "Tiêu đề là bắt buộc"),
   description: z.string().optional(),
@@ -31,11 +32,33 @@ const taskSchema = z.object({
     .optional(),
 });
 
-const TaskModal = ({ task, onClose, defaultStatus }) => {
-  const { addTask, updateTask, deleteTask } = useTaskStore();
+const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
+  const { addTask, updateTask } = useTaskStore();
   const { currentBoard } = useBoardStore();
+  const [newSubtask, setNewSubtask] = useState("");
+  const isEditing = !!task && !isViewMode;
 
-  // Khởi tạo form với React Hook Form và Zod resolver
+  // Nếu ở chế độ xem, sử dụng TaskDetail
+  if (isViewMode) {
+    if (!task) {
+      return (
+        <Modal isOpen={true} onClose={onClose} title="Lỗi">
+          <p className="text-red-500">Không tìm thấy thông tin nhiệm vụ.</p>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded"
+            >
+              Đóng
+            </button>
+          </div>
+        </Modal>
+      );
+    }
+    return <TaskDetail task={task} onClose={onClose} />;
+  }
+
   const {
     register,
     handleSubmit,
@@ -47,20 +70,19 @@ const TaskModal = ({ task, onClose, defaultStatus }) => {
     defaultValues: {
       title: task?.title || "",
       description: task?.description || "",
-      status: task?.status || defaultStatus,
+      status: task?.status || defaultStatus || "toDo",
       priority: task?.priority || "Trung Bình",
       dueDate: task?.dueDate || "",
-      assignee: task?.assignee || "Chưa có thành viên nào được chọn",
+      assignee: task?.assignee || "",
       subtasks: task?.subtasks || [],
     },
   });
 
   const subtasks = watch("subtasks") || [];
-  const [newSubtask, setNewSubtask] = useState("");
 
   const onSubmit = (data) => {
     const taskData = { ...data, boardId: currentBoard?.id };
-    if (task) {
+    if (isEditing) {
       updateTask(task.id, taskData);
     } else {
       addTask(taskData);
@@ -68,17 +90,10 @@ const TaskModal = ({ task, onClose, defaultStatus }) => {
     onClose();
   };
 
-  const handleDelete = () => {
-    if (task) {
-      deleteTask(task.id);
-    }
-    onClose();
-  };
-
   const handleAddSubtask = () => {
     if (newSubtask.trim()) {
       const newSubtasks = [
-        ...(subtasks || []),
+        ...subtasks,
         { id: Date.now(), title: newSubtask, completed: false },
       ];
       setValue("subtasks", newSubtasks);
@@ -87,33 +102,40 @@ const TaskModal = ({ task, onClose, defaultStatus }) => {
   };
 
   const handleToggleSubtask = (index) => {
-    const updatedSubtasks = [...subtasks];
-    updatedSubtasks[index].completed = !updatedSubtasks[index].completed;
-    setValue("subtasks", updatedSubtasks);
+    const updated = [...subtasks];
+    updated[index].completed = !updated[index].completed;
+    setValue("subtasks", updated);
   };
 
   return (
     <Modal
       isOpen={true}
       onClose={onClose}
-      title={task ? "Chỉnh sửa Task" : "Thêm Task"}
+      title={isEditing ? "Chỉnh sửa Nhiệm vụ" : "Tạo Nhiệm vụ"}
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-4"
+        autoComplete="off"
+      >
+        {/* Title */}
         <div>
           <Input {...register("title")} placeholder="Tiêu đề task" />
           {errors.title && (
             <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
           )}
         </div>
+
+        {/* Description */}
         <textarea
           {...register("description")}
           className="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded"
           placeholder="Mô tả"
         />
+
+        {/* Status */}
         <div>
-          <label className="text-sm text-gray-600 dark:text-gray-400">
-            Trạng thái
-          </label>
+          <label className="text-sm">Trạng thái</label>
           <select
             {...register("status")}
             className="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded"
@@ -123,10 +145,10 @@ const TaskModal = ({ task, onClose, defaultStatus }) => {
             <option value="done">Done</option>
           </select>
         </div>
+
+        {/* Priority */}
         <div>
-          <label className="text-sm text-gray-600 dark:text-gray-400">
-            Ưu tiên
-          </label>
+          <label className="text-sm">Ưu tiên</label>
           <select
             {...register("priority")}
             className="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded"
@@ -136,39 +158,34 @@ const TaskModal = ({ task, onClose, defaultStatus }) => {
             <option value="Cao">Cao</option>
           </select>
         </div>
+
+        {/* Due Date */}
         <div>
-          <label className="text-sm text-gray-600 dark:text-gray-400">
-            Ngày hết hạn
-          </label>
+          <label className="text-sm">Ngày hết hạn</label>
           <Input type="date" {...register("dueDate")} />
           {errors.dueDate && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.dueDate.message}
-            </p>
+            <p className="text-red-500 text-sm">{errors.dueDate.message}</p>
           )}
         </div>
 
+        {/* Subtasks */}
         <div>
-          <label className="text-sm text-gray-600 dark:text-gray-400">
-            Subtasks
-          </label>
-          {subtasks.map((subtask, index) => (
-            <div key={subtask.id} className="flex items-center space-x-2 mt-1">
+          <label className="text-sm">Subtasks</label>
+          {subtasks.map((sub, idx) => (
+            <div key={sub.id} className="flex items-center space-x-2 mt-1">
               <input
                 type="checkbox"
-                checked={subtask.completed}
-                onChange={() => handleToggleSubtask(index)}
-                className="h-4 w-4 text-primary"
+                checked={sub.completed}
+                onChange={() => handleToggleSubtask(idx)}
               />
               <span
-                className={
-                  subtask.completed ? "line-through text-gray-500" : ""
-                }
+                className={sub.completed ? "line-through text-gray-500" : ""}
               >
-                {subtask.title}
+                {sub.title}
               </span>
             </div>
           ))}
+
           <div className="flex space-x-2 mt-2">
             <Input
               value={newSubtask}
@@ -184,28 +201,21 @@ const TaskModal = ({ task, onClose, defaultStatus }) => {
             </button>
           </div>
         </div>
+
+        {/* Actions */}
         <div className="flex justify-end space-x-2">
-          {task && (
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="px-4 py-2 bg-red-500 text-white rounded"
-            >
-              Xóa
-            </button>
-          )}
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-gray-300 rounded"
+            className="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded"
           >
-            Hủy
+            Đóng
           </button>
           <button
             type="submit"
             className="px-4 py-2 bg-primary text-white rounded"
           >
-            {task ? "Lưu" : "Tạo"}
+            {isEditing ? "Lưu" : "Tạo"}
           </button>
         </div>
       </form>
@@ -213,4 +223,4 @@ const TaskModal = ({ task, onClose, defaultStatus }) => {
   );
 };
 
-export default TaskModal;
+export default AddTaskModal;
