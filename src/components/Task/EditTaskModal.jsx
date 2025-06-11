@@ -192,7 +192,11 @@ const EditTaskModal = ({ task, onClose }) => {
                 onChange={() => handleToggleSubtask(idx)}
               />
               <span
-                className={sub.completed ? "line-through text-gray-500" : ""}
+                className={
+                  sub.completed
+                    ? "line-through text-gray-500 dark:text-gray-200"
+                    : ""
+                }
               >
                 {sub.title}
               </span>

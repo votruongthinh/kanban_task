@@ -61,7 +61,7 @@ const BoardList = ({ onOpenBoardModal }) => {
         >
           <span>{board.name}</span>
           <div className="menu-container relative">
-            <button onClick={() => toggleMenu(board.id)}>⋮</button>
+            <button onClick={() => toggleMenu(board.id)}>☰</button>
             {showMenu === board.id && (
               <div className="absolute right-0 bg-white dark:bg-gray-800 shadow-lg rounded-md p-2">
                 <button

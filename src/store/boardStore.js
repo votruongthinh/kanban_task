@@ -12,12 +12,20 @@ export const useBoardStore = create(
           const newBoard = { id: generateId(), name: boardName };
           return { boards: [...state.boards, newBoard] };
         }),
+
       updateBoard: (boardId, updatedData) =>
-        set((state) => ({
-          boards: state.boards.map((board) =>
+        set((state) => {
+          const updatedBoards = state.boards.map((board) =>
             board.id === boardId ? { ...board, ...updatedData } : board
-          ),
-        })),
+          );
+          return {
+            boards: updatedBoards,
+            currentBoard:
+              state.currentBoard?.id === boardId
+                ? { ...state.currentBoard, ...updatedData }
+                : state.currentBoard,
+          };
+        }),
       deleteBoard: (boardId) =>
         set((state) => ({
           boards: state.boards.filter((board) => board.id !== boardId),

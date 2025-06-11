@@ -19,7 +19,7 @@ const Sidebar = ({ onOpenBoardModal }) => {
         <div className="flex items-center space-x-2">
           <img src="/vite.svg" alt="Kanban Logo" className="w-8 h-8" />
           <span className="text-xl font-bold text-gray-800 dark:text-gray-200">
-            Kanban
+            Kanban DashBoard
           </span>
         </div>
       </div>

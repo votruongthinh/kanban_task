@@ -129,16 +129,16 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
         {/* Description */}
         <textarea
           {...register("description")}
-          className="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded"
+          className="w-full p-2 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded"
           placeholder="Mô tả"
         />
 
         {/* Status */}
         <div>
-          <label className="text-sm">Trạng thái</label>
+          <label className="text-sm dark:text-gray-200">Trạng thái</label>
           <select
             {...register("status")}
-            className="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded"
+            className="w-full p-2 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded"
           >
             <option value="toDo">To Do</option>
             <option value="progress">Progress</option>
@@ -148,10 +148,10 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
 
         {/* Priority */}
         <div>
-          <label className="text-sm">Ưu tiên</label>
+          <label className="text-sm dark:text-gray-200">Ưu tiên</label>
           <select
             {...register("priority")}
-            className="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded"
+            className="w-full p-2 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded"
           >
             <option value="Thấp">Thấp</option>
             <option value="Trung Bình">Trung Bình</option>
@@ -161,7 +161,7 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
 
         {/* Due Date */}
         <div>
-          <label className="text-sm">Ngày hết hạn</label>
+          <label className="text-sm dark:text-gray-200">Ngày hết hạn</label>
           <Input type="date" {...register("dueDate")} />
           {errors.dueDate && (
             <p className="text-red-500 text-sm">{errors.dueDate.message}</p>
@@ -170,7 +170,7 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
 
         {/* Subtasks */}
         <div>
-          <label className="text-sm">Subtasks</label>
+          <label className="text-sm dark:text-gray-200">Subtasks</label>
           {subtasks.map((sub, idx) => (
             <div key={sub.id} className="flex items-center space-x-2 mt-1">
               <input
@@ -207,7 +207,7 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded"
+            className="px-4 py-2 bg-gray-300 dark:text-gray-200 dark:bg-gray-600 rounded"
           >
             Đóng
           </button>
@@ -215,7 +215,7 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
             type="submit"
             className="px-4 py-2 bg-primary text-white rounded"
           >
-            {isEditing ? "Lưu" : "Tạo"}
+            Tạo
           </button>
         </div>
       </form>

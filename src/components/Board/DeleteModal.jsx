@@ -4,10 +4,14 @@ import { z } from "zod";
 import { useBoardStore } from "../../store/boardStore.js";
 import Modal from "../UI/Modal";
 import Input from "../UI/Input";
+import { useEffect } from "react";
+
+// Custom hook để lấy danh sách boards
+const useBoards = () => useBoardStore((state) => state.boards);
 
 const deleteSchema = z.object({
-  confirmText: z.literal("DELETE", {
-    errorMap: () => ({ message: "Vui lòng nhập đúng 'DELETE' để xác nhận" }),
+  confirmText: z.literal("delete", {
+    errorMap: () => ({ message: "Vui lòng nhập đúng 'delete' để xác nhận" }),
   }),
 });
 
@@ -18,6 +22,7 @@ const DeleteModal = ({ isOpen, onClose, board }) => {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
     reset,
   } = useForm({
     resolver: zodResolver(deleteSchema),
@@ -25,6 +30,12 @@ const DeleteModal = ({ isOpen, onClose, board }) => {
       confirmText: "",
     },
   });
+
+  // Theo dõi giá trị confirmText để áp dụng màu đỏ
+  const confirmText = watch("confirmText");
+  useEffect(() => {
+    console.log("Confirm text changed:", confirmText);
+  }, [confirmText]);
 
   const onSubmit = () => {
     if (board) {
@@ -46,13 +57,15 @@ const DeleteModal = ({ isOpen, onClose, board }) => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <p className="text-gray-700 dark:text-gray-300 mb-4">
           Bạn có chắc chắn muốn xóa board "{board?.name}"? Vui lòng nhập
-          <span className="text-red-500 font-bold"> "DELETE" </span> để xác
+          <span className="text-red-500 font-bold"> "delete" </span> để xác
           nhận.
         </p>
         <Input
           {...register("confirmText")}
-          placeholder="DELETE"
-          className="border rounded-md p-2 w-full mb-4 bg-red-100" // Changed background color to red
+          placeholder="vui lòng nhập 'delete'"
+          className={`border rounded-md p-2 w-full mb-4 bg-red-100 ${
+            confirmText.toLowerCase() === "delete" ? "text-red-500" : ""
+          }`}
         />
         {errors.confirmText && (
           <p className="text-red-500 text-sm mb-2">
