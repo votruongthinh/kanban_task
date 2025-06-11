@@ -127,7 +127,7 @@ const BoardModal = ({ isOpen, onClose, board }) => {
             type="submit"
             className="px-4 py-2 bg-primary text-white rounded"
           >
-            {board ? "Lưu" : "Tạo"}
+            Tạo
           </button>
         </div>
       </form>

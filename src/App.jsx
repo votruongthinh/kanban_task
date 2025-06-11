@@ -32,7 +32,11 @@ function App() {
         )}
 
         {/* Content chính */}
-        <div className="flex flex-col flex-1 overflow-hidden z-10">
+        <div
+          className={`flex flex-col flex-1 overflow-hidden z-10 transition-all duration-300 ${
+            isSidebarVisible ? "ml-64" : "ml-0"
+          }`}
+        >
           {/* Nút mở Sidebar trên mobile */}
           {!isSidebarVisible && (
             <div className="absolute top-4 left-4 z-50">
