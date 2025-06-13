@@ -14,7 +14,7 @@ const Sidebar = ({ onOpenBoardModal }) => {
   `;
 
   return (
-    <div className={sidebarClasses} aria-label="Sidebar">
+    <div className={sidebarClasses} aria-label="Sidebar" data-testid="sidebar">
       <div className="p-4">
         <div className="flex items-center space-x-2">
           <img src="/vite.svg" alt="Kanban Logo" className="w-8 h-8" />
@@ -29,6 +29,7 @@ const Sidebar = ({ onOpenBoardModal }) => {
       <div className="p-4 border-t border-gray-200 dark:border-gray-700 mt-auto">
         <ThemeToggle />
         <button
+          data-testid="close-sidebar-btn"
           onClick={toggleSidebar}
           className="mt-2 w-full text-center text-gray-600 dark:text-gray-300 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
         >

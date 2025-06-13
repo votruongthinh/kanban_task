@@ -114,6 +114,7 @@ const BoardModal = ({ isOpen, onClose, board }) => {
         <div className="mt-4 flex justify-end space-x-2">
           <button
             type="button"
+            data-testid="cancel-board-btn"
             onClick={() => {
               reset({ name: "" }); // Reset form khi nhấn Hủy
               setSubmitError(""); // Xóa lỗi khi nhấn Hủy
@@ -124,6 +125,7 @@ const BoardModal = ({ isOpen, onClose, board }) => {
             Hủy
           </button>
           <button
+            data-testid="submit-board-btn"
             type="submit"
             className="px-4 py-2 bg-primary text-white rounded"
           >

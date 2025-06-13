@@ -54,15 +54,6 @@ const EditTaskModal = ({ task, onClose }) => {
     return (
       <Modal isOpen={true} onClose={onClose} title="Lỗi">
         <p className="text-red-500">Không tìm thấy nhiệm vụ để chỉnh sửa.</p>
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded"
-          >
-            Đóng
-          </button>
-        </div>
       </Modal>
     );
   }
@@ -212,8 +203,10 @@ const EditTaskModal = ({ task, onClose }) => {
 
         {/* Due Date */}
         <div>
-          <label className="text-sm dark:text-gray-200">Ngày hết hạn</label>
-          <Input type="date" {...register("dueDate")} />
+          <label htmlFor="dueDate" className="text-sm dark:text-gray-200">
+            Ngày hết hạn
+          </label>
+          <Input id="dueDate" type="date" {...register("dueDate")} />
           {errors.dueDate && (
             <p className="text-red-500 text-sm">{errors.dueDate.message}</p>
           )}
@@ -245,6 +238,7 @@ const EditTaskModal = ({ task, onClose }) => {
                       type="button"
                       className="text-green-600 hover:text-green-800 mr-2"
                       onClick={() => handleSaveEditSubtask(idx)}
+                      data-testid={`save-subtask-${idx}`}
                     >
                       Lưu
                     </button>
@@ -307,12 +301,14 @@ const EditTaskModal = ({ task, onClose }) => {
           <button
             type="button"
             onClick={onClose}
+            data-testid="close-main"
             className="px-4 py-2 bg-gray-300 dark:text-gray-200 dark:bg-gray-600 rounded"
           >
             Đóng
           </button>
           <button
             type="submit"
+            data-testid="save-main"
             className="px-4 py-2 bg-primary text-white rounded"
           >
             Lưu

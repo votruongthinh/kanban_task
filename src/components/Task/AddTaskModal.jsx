@@ -176,8 +176,10 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
 
         {/* Due Date */}
         <div>
-          <label className="text-sm dark:text-gray-200">Ngày hết hạn</label>
-          <Input type="date" {...register("dueDate")} />
+          <label htmlFor="dueDate" className="text-sm dark:text-gray-200">
+            Ngày hết hạn
+          </label>
+          <Input id="dueDate" type="date" {...register("dueDate")} />
           {errors.dueDate && (
             <p className="text-red-500 text-sm">{errors.dueDate.message}</p>
           )}

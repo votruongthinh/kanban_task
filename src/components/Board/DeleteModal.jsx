@@ -74,6 +74,7 @@ const DeleteModal = ({ isOpen, onClose, board }) => {
         )}
         <div className="flex justify-end space-x-3">
           <button
+            data-testid="cancel-delete-btn"
             type="button"
             onClick={() => {
               reset();
@@ -84,6 +85,7 @@ const DeleteModal = ({ isOpen, onClose, board }) => {
             Hủy
           </button>
           <button
+            data-testid="submit-delete-btn"
             type="submit"
             className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
           >

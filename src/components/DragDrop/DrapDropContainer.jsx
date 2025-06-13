@@ -43,6 +43,7 @@ const SortableTask = ({ task, onTaskClick, onEditTask, onDeleteTask }) => {
       style={style}
       {...attributes}
       {...listeners}
+      data-testid={`task-card-${task.id}`}
       onClick={(e) => {
         e.stopPropagation();
         onTaskClick(task);
@@ -89,6 +90,7 @@ const SortableColumn = ({
       style={style}
       {...attributes}
       {...listeners}
+      data-testid={`column-${column.id}`}
       className="flex-1 bg-gray-200 dark:bg-gray-800 rounded-lg p-2 sm:p-3 min-h-[150px] sm:min-h-[200px] flex flex-col"
     >
       <div className="flex items-center mb-2">
@@ -134,6 +136,7 @@ const SortableColumn = ({
       </div>
       <div className="mt-2">
         <button
+          data-testid={`create-task-btn-${column.status}`}
           onClick={() => onCreateTask(column.status)}
           className="w-full bg-blue-500 text-white py-1.5 rounded hover:bg-blue-600 transition-colors text-sm shadow-md"
         >

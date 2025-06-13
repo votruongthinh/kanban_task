@@ -20,6 +20,7 @@ const TaskCard = ({ task, onEditTask, onTaskClick, onDeleteTask }) => {
 
   return (
     <div
+      data-testid="task-card"
       className="p-2 bg-lightCard dark:bg-darkCard rounded-lg border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-shadow mb-2 relative"
       onClick={(e) => {
         if (typeof onTaskClick === "function" && !e.target.closest("button"))
@@ -28,6 +29,7 @@ const TaskCard = ({ task, onEditTask, onTaskClick, onDeleteTask }) => {
     >
       <div className="flex justify-between items-center">
         <h3
+          data-testid="task-card-title"
           className={`font-semibold text-gray-800 dark:text-gray-200 text-sm ${
             task.status === "done"
               ? "line-through text-green-500 dark:text-green-400"
@@ -38,6 +40,7 @@ const TaskCard = ({ task, onEditTask, onTaskClick, onDeleteTask }) => {
         </h3>
         <div className="relative">
           <button
+            data-testid="task-card-menu-btn"
             onClick={(e) => {
               e.stopPropagation();
               setIsMenuOpen(!isMenuOpen);
@@ -49,6 +52,7 @@ const TaskCard = ({ task, onEditTask, onTaskClick, onDeleteTask }) => {
           {isMenuOpen && (
             <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-10">
               <button
+                data-testid="task-card-edit-btn"
                 onClick={(e) => {
                   e.stopPropagation();
                   onEditTask(task);
@@ -59,6 +63,7 @@ const TaskCard = ({ task, onEditTask, onTaskClick, onDeleteTask }) => {
                 Chỉnh sửa
               </button>
               <button
+                data-testid="task-card-delete-btn"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (typeof onDeleteTask === "function") {

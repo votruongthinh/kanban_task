@@ -96,6 +96,7 @@ const RenameModal = ({ isOpen, onClose, board }) => {
         )}
         <div className="flex justify-end space-x-3">
           <button
+            data-testid="cancel-rename-btn"
             type="button"
             onClick={() => {
               reset();
@@ -106,6 +107,7 @@ const RenameModal = ({ isOpen, onClose, board }) => {
             Hủy
           </button>
           <button
+            data-testid="submit-rename-btn"
             type="submit"
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
           >

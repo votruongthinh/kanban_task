@@ -52,6 +52,7 @@ const BoardList = ({ onOpenBoardModal }) => {
       {boards.map((board) => (
         <div
           key={board.id}
+          data-testid={`board-item-${board.id}`}
           onClick={() => handleSelectBoard(board)}
           className={`flex items-center justify-between space-x-2 px-4 py-2 cursor-pointer rounded-r-full ${
             currentBoard?.id === board.id
@@ -61,16 +62,23 @@ const BoardList = ({ onOpenBoardModal }) => {
         >
           <span>{board.name}</span>
           <div className="menu-container relative">
-            <button onClick={() => toggleMenu(board.id)}>☰</button>
+            <button
+              data-testid={`board-menu-btn-${board.id}`}
+              onClick={() => toggleMenu(board.id)}
+            >
+              ☰
+            </button>
             {showMenu === board.id && (
               <div className="absolute right-0 bg-white dark:bg-gray-800 shadow-lg rounded-md p-2">
                 <button
+                  data-testid={`rename-btn-${board.id}`}
                   className="text-green-600 dark:text-green-400 w-full text-left px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => openRenameModal(board)}
                 >
                   Đổi tên
                 </button>
                 <button
+                  data-testid={`delete-btn-${board.id}`}
                   className="text-red-600 dark:text-red-400 w-full text-left px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => openDeleteModal(board)}
                 >
@@ -82,6 +90,7 @@ const BoardList = ({ onOpenBoardModal }) => {
         </div>
       ))}
       <button
+        data-testid="create-board-btn"
         onClick={() => onOpenBoardModal(null)}
         className="flex items-center space-x-2 px-4 py-2 text-primary hover:bg-gray-200 dark:hover:bg-gray-600 rounded-r-full w-full"
       >

@@ -122,6 +122,7 @@ const TaskDetail = ({ task, onClose }) => {
                       checked={sub.completed}
                       onChange={() => handleToggleSubtask(sub.id)}
                       className="cursor-pointer"
+                      data-testid={`subtask-checkbox-${sub.id}`}
                     />
                     <span
                       className={`ml-2 ${
@@ -144,6 +145,7 @@ const TaskDetail = ({ task, onClose }) => {
             type="button"
             onClick={onClose}
             className="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded"
+            data-testid="close-detail"
           >
             Đóng
           </button>
