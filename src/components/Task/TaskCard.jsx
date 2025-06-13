@@ -76,7 +76,7 @@ const TaskCard = ({ task, onEditTask, onTaskClick, onDeleteTask }) => {
       {task.subtasks?.length > 0 && (
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           {task.subtasks.filter((sub) => sub.completed).length}/
-          {task.subtasks.length} subtasks
+          {task.subtasks.length} nhiệm vụ con
         </p>
       )}
     </div>

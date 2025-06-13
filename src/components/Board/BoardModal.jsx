@@ -100,7 +100,7 @@ const BoardModal = ({ isOpen, onClose, board }) => {
       title={board ? "Chỉnh sửa Board" : "Thêm Board mới"}
     >
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Input {...register("name")} placeholder="Nhập tên board..." />
+        <Input {...register("name")} placeholder="Nhập tên bảng..." />
         {errors.name && (
           <div className="bg-red-100 text-red-700 p-2 mt-2 rounded">
             <p className="text-sm">{errors.name.message}</p>

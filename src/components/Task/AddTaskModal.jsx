@@ -17,8 +17,8 @@ const taskSchema = z.object({
   dueDate: z
     .string()
     .optional()
-    .refine((val) => !val || !isNaN(Date.parse(val)), {
-      message: "Ngày hết hạn không hợp lệ",
+    .refine((val) => !val || new Date(val) >= new Date(), {
+      message: "Ngày hết hạn phải bắt đầu từ hôm nay trở đi",
     }),
   assignee: z.string().optional(),
   subtasks: z
@@ -101,12 +101,6 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
     }
   };
 
-  const handleToggleSubtask = (index) => {
-    const updated = [...subtasks];
-    updated[index].completed = !updated[index].completed;
-    setValue("subtasks", updated);
-  };
-
   return (
     <Modal
       isOpen={true}
@@ -169,23 +163,29 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
         </div>
 
         {/* Subtasks */}
+        {/* Subtasks */}
         <div>
-          <label className="text-sm dark:text-gray-200">Subtasks</label>
-          {subtasks.map((sub, idx) => (
-            <div key={sub.id} className="flex items-center space-x-2 mt-1">
-              <input
-                type="checkbox"
-                checked={sub.completed}
-                onChange={() => handleToggleSubtask(idx)}
-              />
-              <span
-                className={sub.completed ? "line-through text-gray-500" : ""}
+          <label className="text-sm dark:text-gray-200">Nhiệm vụ con</label>
+          <div className="max-h-16 overflow-y-auto border rounded">
+            {subtasks.map((sub, idx) => (
+              <div
+                key={sub.id}
+                className="flex items-center justify-between p-2 border-b last:border-none"
               >
-                {sub.title}
-              </span>
-            </div>
-          ))}
-
+                <span>{sub.title}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newSubtasks = subtasks.filter((_, i) => i !== idx);
+                    setValue("subtasks", newSubtasks);
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
           <div className="flex space-x-2 mt-2">
             <Input
               value={newSubtask}

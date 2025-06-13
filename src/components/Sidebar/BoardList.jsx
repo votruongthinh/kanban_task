@@ -47,7 +47,7 @@ const BoardList = ({ onOpenBoardModal }) => {
   return (
     <div className="flex-1 overflow-y-auto">
       <h2 className="text-gray-500 dark:text-gray-400 text-sm font-semibold px-4 mb-2">
-        All Boards ({boards.length})
+        Tất Cả Các Bảng ({boards.length})
       </h2>
       {boards.map((board) => (
         <div
@@ -68,13 +68,13 @@ const BoardList = ({ onOpenBoardModal }) => {
                   className="text-green-600 dark:text-green-400 w-full text-left px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => openRenameModal(board)}
                 >
-                  Rename
+                  Đổi tên
                 </button>
                 <button
                   className="text-red-600 dark:text-red-400 w-full text-left px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => openDeleteModal(board)}
                 >
-                  Delete
+                  Xóa
                 </button>
               </div>
             )}
@@ -85,7 +85,7 @@ const BoardList = ({ onOpenBoardModal }) => {
         onClick={() => onOpenBoardModal(null)}
         className="flex items-center space-x-2 px-4 py-2 text-primary hover:bg-gray-200 dark:hover:bg-gray-600 rounded-r-full w-full"
       >
-        <span>+ Create New Board</span>
+        <span>+ Tạo Bảng Mới</span>
       </button>
 
       {/* Modal riêng cho Rename và Delete */}

@@ -16,8 +16,8 @@ const taskSchema = z.object({
   dueDate: z
     .string()
     .optional()
-    .refine((val) => !val || !isNaN(Date.parse(val)), {
-      message: "Ngày hết hạn không hợp lệ",
+    .refine((val) => !val || new Date(val) >= new Date(), {
+      message: "Ngày hết hạn phải bắt đầu từ hôm nay trở đi",
     }),
   assignee: z.string().optional(),
   subtasks: z
@@ -35,6 +35,9 @@ const EditTaskModal = ({ task, onClose }) => {
   const { updateTask } = useTaskStore();
   const { currentBoard } = useBoardStore();
   const [newSubtask, setNewSubtask] = useState("");
+  const [editingSubtaskIndex, setEditingSubtaskIndex] = useState(null);
+  const [editingSubtaskValue, setEditingSubtaskValue] = useState("");
+  const [subtaskError, setSubtaskError] = useState("");
 
   // Kiểm tra nếu task không tồn tại
   if (!task) {
@@ -75,150 +78,209 @@ const EditTaskModal = ({ task, onClose }) => {
 
   const subtasks = watch("subtasks") || [];
 
+  // Thêm subtask mới
+  const handleAddSubtask = () => {
+    setSubtaskError("");
+    if (!newSubtask.trim()) return;
+    if (
+      subtasks.some(
+        (sub) =>
+          sub.title.trim().toLowerCase() === newSubtask.trim().toLowerCase()
+      )
+    ) {
+      setSubtaskError("Tên nhiệm vụ con đã tồn tại.");
+      return;
+    }
+    const newSubtasks = [
+      ...subtasks,
+      { id: Date.now(), title: newSubtask.trim(), completed: false },
+    ];
+    setValue("subtasks", newSubtasks);
+    setNewSubtask("");
+  };
+
+  // Xoá subtask
+  const handleRemoveSubtask = (idx) => {
+    setSubtaskError("");
+    const newSubtasks = subtasks.filter((_, i) => i !== idx);
+    setValue("subtasks", newSubtasks);
+  };
+
+  // Bắt đầu sửa subtask
+  const handleEditSubtask = (idx, value) => {
+    setSubtaskError("");
+    setEditingSubtaskIndex(idx);
+    setEditingSubtaskValue(value);
+  };
+
+  // Lưu tên subtask sau khi sửa
+  const handleSaveEditSubtask = (idx) => {
+    setSubtaskError("");
+    if (!editingSubtaskValue.trim()) {
+      setSubtaskError("Tên nhiệm vụ con không được để trống.");
+      return;
+    }
+    if (
+      subtasks.some(
+        (sub, i) =>
+          i !== idx &&
+          sub.title.trim().toLowerCase() ===
+            editingSubtaskValue.trim().toLowerCase()
+      )
+    ) {
+      setSubtaskError("Tên nhiệm vụ con đã tồn tại.");
+      return;
+    }
+    const newSubtasks = subtasks.map((sub, i) =>
+      i === idx ? { ...sub, title: editingSubtaskValue.trim() } : sub
+    );
+    setValue("subtasks", newSubtasks);
+    setEditingSubtaskIndex(null);
+    setEditingSubtaskValue("");
+  };
+
+  // Huỷ sửa subtask
+  const handleCancelEditSubtask = () => {
+    setEditingSubtaskIndex(null);
+    setEditingSubtaskValue("");
+    setSubtaskError("");
+  };
+
   const onSubmit = (data) => {
     const taskData = { ...data, boardId: currentBoard?.id };
-    updateTask(task.id, taskData); // Sử dụng updateTask với task.id và updatedData
+    updateTask(task.id, taskData);
     onClose();
-  };
-
-  const handleAddSubtask = () => {
-    if (newSubtask.trim()) {
-      const newSubtasks = [
-        ...subtasks,
-        { id: Date.now(), title: newSubtask, completed: false },
-      ];
-      setValue("subtasks", newSubtasks);
-      setNewSubtask("");
-    }
-  };
-
-  const handleToggleSubtask = (index) => {
-    const updated = [...subtasks];
-    updated[index].completed = !updated[index].completed;
-    setValue("subtasks", updated);
   };
 
   return (
     <Modal isOpen={true} onClose={onClose} title="Chỉnh sửa Nhiệm vụ">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="p-4 space-y-4"
+        className="space-y-4"
         autoComplete="off"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Tiêu đề */}
-          <div>
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Tiêu đề
-            </label>
-            <Input
-              {...register("title")}
-              placeholder="Tiêu đề task"
-              className="w-full"
-            />
-            {errors.title && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.title.message}
-              </p>
-            )}
-          </div>
-
-          {/* Trạng thái */}
-          <div>
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Trạng thái
-            </label>
-            <select
-              {...register("status")}
-              className="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded"
-            >
-              <option value="toDo">To Do</option>
-              <option value="progress">Progress</option>
-              <option value="done">Done</option>
-            </select>
-          </div>
-
-          {/* Ưu tiên */}
-          <div>
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Ưu tiên
-            </label>
-            <select
-              {...register("priority")}
-              className="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded"
-            >
-              <option value="Thấp">Thấp</option>
-              <option value="Trung Bình">Trung Bình</option>
-              <option value="Cao">Cao</option>
-            </select>
-          </div>
-
-          {/* Ngày hết hạn */}
-          <div>
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Ngày hết hạn
-            </label>
-            <Input type="date" {...register("dueDate")} className="w-full" />
-            {errors.dueDate && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.dueDate.message}
-              </p>
-            )}
-          </div>
+        {/* Title */}
+        <div>
+          <Input {...register("title")} placeholder="Tiêu đề task" />
+          {errors.title && (
+            <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+          )}
         </div>
 
-        {/* Mô tả */}
+        {/* Description */}
+        <textarea
+          {...register("description")}
+          className="w-full p-2 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded"
+          placeholder="Mô tả"
+        />
+
+        {/* Status */}
         <div>
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Mô tả
-          </label>
-          <textarea
-            {...register("description")}
-            className="w-full p-2 bg-gray-100 dark:bg-gray-700 rounded"
-            placeholder="Mô tả"
-          />
+          <label className="text-sm dark:text-gray-200">Trạng thái</label>
+          <select
+            {...register("status")}
+            className="w-full p-2 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded"
+          >
+            <option value="toDo">To Do</option>
+            <option value="progress">Progress</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+
+        {/* Priority */}
+        <div>
+          <label className="text-sm dark:text-gray-200">Ưu tiên</label>
+          <select
+            {...register("priority")}
+            className="w-full p-2 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded"
+          >
+            <option value="Thấp">Thấp</option>
+            <option value="Trung Bình">Trung Bình</option>
+            <option value="Cao">Cao</option>
+          </select>
+        </div>
+
+        {/* Due Date */}
+        <div>
+          <label className="text-sm dark:text-gray-200">Ngày hết hạn</label>
+          <Input type="date" {...register("dueDate")} />
+          {errors.dueDate && (
+            <p className="text-red-500 text-sm">{errors.dueDate.message}</p>
+          )}
         </div>
 
         {/* Subtasks */}
         <div>
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Subtasks
-          </label>
-          {subtasks.map((sub, idx) => (
-            <div key={sub.id} className="flex items-center space-x-2 mt-1">
-              <input
-                type="checkbox"
-                checked={sub.completed}
-                onChange={() => handleToggleSubtask(idx)}
-              />
-              <span
-                className={
-                  sub.completed
-                    ? "line-through text-gray-500 dark:text-gray-200"
-                    : ""
-                }
+          <label className="text-sm dark:text-gray-200">Nhiệm vụ con</label>
+          <div className="max-h-32 overflow-y-auto border rounded">
+            {subtasks.map((sub, idx) => (
+              <div
+                key={sub.id}
+                className="flex items-center justify-between p-2 border-b last:border-none"
               >
-                {sub.title}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  const newSubtasks = subtasks.filter((_, i) => i !== idx);
-                  setValue("subtasks", newSubtasks);
-                }}
-                className="text-red-500 hover:text-red-700 ml-2"
-              >
-                Xóa
-              </button>
-            </div>
-          ))}
-
+                {editingSubtaskIndex === idx ? (
+                  <>
+                    <input
+                      type="text"
+                      value={editingSubtaskValue}
+                      onChange={(e) => setEditingSubtaskValue(e.target.value)}
+                      className="flex-1 mr-2 p-1 rounded border"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSaveEditSubtask(idx);
+                        if (e.key === "Escape") handleCancelEditSubtask();
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="text-green-600 hover:text-green-800 mr-2"
+                      onClick={() => handleSaveEditSubtask(idx)}
+                    >
+                      Lưu
+                    </button>
+                    <button
+                      type="button"
+                      className="text-gray-500 hover:text-gray-700"
+                      onClick={handleCancelEditSubtask}
+                    >
+                      Huỷ
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span>{sub.title}</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        className="text-blue-500 hover:text-blue-700"
+                        onClick={() => handleEditSubtask(idx, sub.title)}
+                      >
+                        Sửa
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSubtask(idx)}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+          {subtaskError && (
+            <p className="text-red-500 text-sm mt-1">{subtaskError}</p>
+          )}
           <div className="flex space-x-2 mt-2">
             <Input
               value={newSubtask}
               onChange={(e) => setNewSubtask(e.target.value)}
               placeholder="Thêm subtask"
-              className="flex-1"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAddSubtask();
+              }}
             />
             <button
               type="button"
@@ -235,7 +297,7 @@ const EditTaskModal = ({ task, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded"
+            className="px-4 py-2 bg-gray-300 dark:text-gray-200 dark:bg-gray-600 rounded"
           >
             Đóng
           </button>
