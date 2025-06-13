@@ -11,12 +11,19 @@ const TaskCard = ({ task, onEditTask, onTaskClick, onDeleteTask }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMenuOpen]);
 
+  // Tính tiến độ subtasks
+  const totalSubtasks = task.subtasks?.length || 0;
+  const completedSubtasks =
+    task.subtasks?.filter((sub) => sub.completed).length || 0;
+  const progress =
+    totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
+
   return (
     <div
       className="p-2 bg-lightCard dark:bg-darkCard rounded-lg border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-shadow mb-2 relative"
       onClick={(e) => {
         if (typeof onTaskClick === "function" && !e.target.closest("button"))
-          onTaskClick(task); // Chỉ gọi onTaskClick nếu không nhấp vào nút
+          onTaskClick(task);
       }}
     >
       <div className="flex justify-between items-center">
@@ -32,7 +39,7 @@ const TaskCard = ({ task, onEditTask, onTaskClick, onDeleteTask }) => {
         <div className="relative">
           <button
             onClick={(e) => {
-              e.stopPropagation(); // Ngăn lan truyền sự kiện
+              e.stopPropagation();
               setIsMenuOpen(!isMenuOpen);
             }}
             className="flex items-center justify-center w-8 h-8 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 focus:outline-none rounded-full transition duration-200 ease-in-out"
@@ -43,7 +50,7 @@ const TaskCard = ({ task, onEditTask, onTaskClick, onDeleteTask }) => {
             <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-10">
               <button
                 onClick={(e) => {
-                  e.stopPropagation(); // Ngăn lan truyền khi nhấp vào tùy chọn
+                  e.stopPropagation();
                   onEditTask(task);
                   setIsMenuOpen(false);
                 }}
@@ -56,12 +63,6 @@ const TaskCard = ({ task, onEditTask, onTaskClick, onDeleteTask }) => {
                   e.stopPropagation();
                   if (typeof onDeleteTask === "function") {
                     onDeleteTask(task);
-                    console.log("Delete clicked for task:", task);
-                  } else {
-                    console.log(
-                      "onDeleteTask is not a function:",
-                      onDeleteTask
-                    );
                   }
                   setIsMenuOpen(false);
                 }}
@@ -73,11 +74,18 @@ const TaskCard = ({ task, onEditTask, onTaskClick, onDeleteTask }) => {
           )}
         </div>
       </div>
-      {task.subtasks?.length > 0 && (
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          {task.subtasks.filter((sub) => sub.completed).length}/
-          {task.subtasks.length} nhiệm vụ con
-        </p>
+      {totalSubtasks > 0 && (
+        <>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            {completedSubtasks}/{totalSubtasks} nhiệm vụ con
+          </p>
+          <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-1">
+            <div
+              className="bg-green-400 dark:bg-green-400 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+        </>
       )}
     </div>
   );

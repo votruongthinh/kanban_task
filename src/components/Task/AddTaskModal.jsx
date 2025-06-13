@@ -16,10 +16,20 @@ const taskSchema = z.object({
   priority: z.enum(["Thấp", "Trung Bình", "Cao"]),
   dueDate: z
     .string()
-    .optional()
-    .refine((val) => !val || new Date(val) >= new Date(), {
-      message: "Ngày hết hạn phải bắt đầu từ hôm nay trở đi",
-    }),
+    .min(1, "Ngày hết hạn là bắt buộc")
+    .refine(
+      (val) => {
+        if (!val) return false;
+        const d = new Date(val);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        d.setHours(0, 0, 0, 0);
+        return d >= today;
+      },
+      {
+        message: "Ngày hết hạn phải bắt đầu từ hôm nay trở đi",
+      }
+    ),
   assignee: z.string().optional(),
   subtasks: z
     .array(
@@ -36,6 +46,7 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
   const { addTask, updateTask } = useTaskStore();
   const { currentBoard } = useBoardStore();
   const [newSubtask, setNewSubtask] = useState("");
+  const [subtaskError, setSubtaskError] = useState(""); // Thêm state cho lỗi
   const isEditing = !!task && !isViewMode;
 
   // Nếu ở chế độ xem, sử dụng TaskDetail
@@ -90,15 +101,25 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
     onClose();
   };
 
+  // Sửa: kiểm tra trùng tên subtask
   const handleAddSubtask = () => {
-    if (newSubtask.trim()) {
-      const newSubtasks = [
-        ...subtasks,
-        { id: Date.now(), title: newSubtask, completed: false },
-      ];
-      setValue("subtasks", newSubtasks);
-      setNewSubtask("");
+    setSubtaskError("");
+    const trimmed = newSubtask.trim();
+    if (!trimmed) return;
+    if (
+      subtasks.some(
+        (sub) => sub.title.trim().toLowerCase() === trimmed.toLowerCase()
+      )
+    ) {
+      setSubtaskError("Tên nhiệm vụ con đã tồn tại.");
+      return;
     }
+    const newSubtasks = [
+      ...subtasks,
+      { id: Date.now(), title: trimmed, completed: false },
+    ];
+    setValue("subtasks", newSubtasks);
+    setNewSubtask("");
   };
 
   return (
@@ -163,7 +184,6 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
         </div>
 
         {/* Subtasks */}
-        {/* Subtasks */}
         <div>
           <label className="text-sm dark:text-gray-200">Nhiệm vụ con</label>
           <div className="max-h-16 overflow-y-auto border rounded">
@@ -172,7 +192,10 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
                 key={sub.id}
                 className="flex items-center justify-between p-2 border-b last:border-none"
               >
-                <span>{sub.title}</span>
+                {/* Sửa màu chữ cho subtask */}
+                <span className="dark:text-gray-200 text-gray-900">
+                  {sub.title}
+                </span>
                 <button
                   type="button"
                   onClick={() => {
@@ -186,11 +209,18 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
               </div>
             ))}
           </div>
+          {/* Hiển thị lỗi trùng tên subtask nếu có */}
+          {subtaskError && (
+            <p className="text-red-500 text-sm mt-1">{subtaskError}</p>
+          )}
           <div className="flex space-x-2 mt-2">
             <Input
               value={newSubtask}
               onChange={(e) => setNewSubtask(e.target.value)}
               placeholder="Thêm subtask"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAddSubtask();
+              }}
             />
             <button
               type="button"
@@ -215,7 +245,7 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
             type="submit"
             className="px-4 py-2 bg-primary text-white rounded"
           >
-            Tạo
+            {isEditing ? "Lưu" : "Tạo"}
           </button>
         </div>
       </form>

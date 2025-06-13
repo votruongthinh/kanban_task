@@ -15,10 +15,20 @@ const taskSchema = z.object({
   priority: z.enum(["Thấp", "Trung Bình", "Cao"]),
   dueDate: z
     .string()
-    .optional()
-    .refine((val) => !val || new Date(val) >= new Date(), {
-      message: "Ngày hết hạn phải bắt đầu từ hôm nay trở đi",
-    }),
+    .min(1, "Ngày hết hạn là bắt buộc")
+    .refine(
+      (val) => {
+        if (!val) return false;
+        const d = new Date(val);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        d.setHours(0, 0, 0, 0);
+        return d >= today;
+      },
+      {
+        message: "Ngày hết hạn phải bắt đầu từ hôm nay trở đi",
+      }
+    ),
   assignee: z.string().optional(),
   subtasks: z
     .array(
@@ -153,7 +163,7 @@ const EditTaskModal = ({ task, onClose }) => {
   };
 
   return (
-    <Modal isOpen={true} onClose={onClose} title="Chỉnh sửa Nhiệm vụ">
+    <Modal isOpen={true} onClose={onClose} title="Chỉnh Sửa Nhiệm Vụ">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-4"
@@ -216,7 +226,7 @@ const EditTaskModal = ({ task, onClose }) => {
             {subtasks.map((sub, idx) => (
               <div
                 key={sub.id}
-                className="flex items-center justify-between p-2 border-b last:border-none"
+                className="dark:text-gray-200 flex items-center justify-between p-2 border-b last:border-none"
               >
                 {editingSubtaskIndex === idx ? (
                   <>
@@ -224,7 +234,7 @@ const EditTaskModal = ({ task, onClose }) => {
                       type="text"
                       value={editingSubtaskValue}
                       onChange={(e) => setEditingSubtaskValue(e.target.value)}
-                      className="flex-1 mr-2 p-1 rounded border"
+                      className="flex-1 mr-2 p-1 rounded border dark:bg-gray-700 dark:text-gray-200 bg-white text-gray-900"
                       autoFocus
                       onKeyDown={(e) => {
                         if (e.key === "Enter") handleSaveEditSubtask(idx);
@@ -277,7 +287,7 @@ const EditTaskModal = ({ task, onClose }) => {
             <Input
               value={newSubtask}
               onChange={(e) => setNewSubtask(e.target.value)}
-              placeholder="Thêm subtask"
+              placeholder="'Thêm nhiệm vụ con vào đây'"
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleAddSubtask();
               }}
