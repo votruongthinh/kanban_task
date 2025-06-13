@@ -32,7 +32,6 @@ const TaskDetail = ({ task, onClose }) => {
             {task.title}
           </p>
         </div>
-        {/* ...Các trường khác tương tự... */}
         <div>
           <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
             Mô tả
@@ -112,7 +111,9 @@ const TaskDetail = ({ task, onClose }) => {
                 <div
                   key={sub.id}
                   className={`flex items-center justify-between p-2 border-b last:border-none ${
-                    sub.completed ? "bg-green-100" : "bg-gray-100"
+                    sub.completed
+                      ? "bg-green-100 dark:bg-green-500"
+                      : "bg-gray-100 dark:bg-gray-700"
                   }`}
                 >
                   <div className="flex items-center">
@@ -126,7 +127,7 @@ const TaskDetail = ({ task, onClose }) => {
                       className={`ml-2 ${
                         sub.completed
                           ? "line-through text-gray-500"
-                          : "text-gray-800 dark:text-gray-200"
+                          : "text-gray-900 dark:text-gray-100"
                       }`}
                     >
                       {sub.title}

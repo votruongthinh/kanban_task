@@ -217,7 +217,7 @@ const AddTaskModal = ({ task, onClose, defaultStatus, isViewMode = false }) => {
             <Input
               value={newSubtask}
               onChange={(e) => setNewSubtask(e.target.value)}
-              placeholder="Thêm subtask"
+              placeholder="'Thêm nhiệm vụ con vào đây'"
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleAddSubtask();
               }}
